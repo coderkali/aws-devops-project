@@ -15,22 +15,22 @@ format_time() {
 up() {
   TOTAL_START=$SECONDS
 
-  echo "==> [1/7] Applying VPC"
+  echo "==> [1/8] Applying VPC"
   STEP_START=$SECONDS
   cd $INFRA_DIR/vpc && terraform apply -auto-approve
   echo "    VPC done in $(format_time $((SECONDS - STEP_START)))"
 
-  echo "==> [2/7] Applying EKS"
+  echo "==> [2/8] Applying EKS"
   STEP_START=$SECONDS
   cd $INFRA_DIR/eks && terraform apply -auto-approve
   echo "    EKS done in $(format_time $((SECONDS - STEP_START)))"
 
-  echo "==> [3/7] Configuring kubectl"
+  echo "==> [3/8] Configuring kubectl"
   STEP_START=$SECONDS
   aws eks update-kubeconfig --region us-east-1 --name devops-eks-cluster
   echo "    kubectl configured in $(format_time $((SECONDS - STEP_START)))"
 
-  echo "==> [4/7] Creating namespace and secrets"
+  echo "==> [4/8] Creating namespace and secrets"
   STEP_START=$SECONDS
   kubectl create namespace retail-store --dry-run=client -o yaml | kubectl apply -f -
   
@@ -47,22 +47,28 @@ up() {
     --dry-run=client -o yaml | kubectl apply -f -
   echo "    Namespace and secrets ready in $(format_time $((SECONDS - STEP_START)))"
 
-  echo "==> [5/7] Applying Addons"
+  echo "==> [5/8] Applying Addons"
   STEP_START=$SECONDS
   cd $INFRA_DIR/addons && terraform apply -auto-approve
   echo "    Addons done in $(format_time $((SECONDS - STEP_START)))"
 
-  echo "==> [6/7] Applying Kubernetes resources"
+  echo "==> [6/8] Applying Kubernetes resources"
   STEP_START=$SECONDS
   kubectl apply -f $K8S_DIR
   echo "    Kubernetes resources done in $(format_time $((SECONDS - STEP_START)))"
 
   # ... existing steps ...
 
-  echo "==> [7/7] Applying Data Plane"
+  echo "==> [7/8] Applying Data Plane"
   STEP_START=$SECONDS
   cd $INFRA_DIR/data-plane && terraform init && terraform apply -auto-approve
   echo "    Data plane done in $(format_time $((SECONDS - STEP_START)))"
+
+  echo "==> [8/8] Updating Helm values with data plane endpoints"
+  STEP_START=$SECONDS
+  chmod +x $BASE_DIR/scripts/update-helm-values.sh
+  $BASE_DIR/scripts/update-helm-values.sh
+  echo "    Helm values updated in $(format_time $((SECONDS - STEP_START)))"
 
   echo ""
   echo "================================"
