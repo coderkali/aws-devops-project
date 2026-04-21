@@ -15,34 +15,51 @@ format_time() {
 up() {
   TOTAL_START=$SECONDS
 
-  echo "==> [1/6] Applying VPC"
+  echo "==> [1/7] Applying VPC"
   STEP_START=$SECONDS
   cd $INFRA_DIR/vpc && terraform apply -auto-approve
   echo "    VPC done in $(format_time $((SECONDS - STEP_START)))"
 
-  echo "==> [2/6] Applying EKS"
+  echo "==> [2/7] Applying EKS"
   STEP_START=$SECONDS
   cd $INFRA_DIR/eks && terraform apply -auto-approve
   echo "    EKS done in $(format_time $((SECONDS - STEP_START)))"
 
-  echo "==> [3/6] Configuring kubectl"
+  echo "==> [3/7] Configuring kubectl"
   STEP_START=$SECONDS
   aws eks update-kubeconfig --region us-east-1 --name devops-eks-cluster
   echo "    kubectl configured in $(format_time $((SECONDS - STEP_START)))"
 
-  echo "==> [4/6] Applying Addons"
+  echo "==> [4/7] Creating namespace and secrets"
+  STEP_START=$SECONDS
+  kubectl create namespace retail-store --dry-run=client -o yaml | kubectl apply -f -
+  
+  kubectl create secret generic db-credentials \
+    --namespace retail-store \
+    --from-literal=username=$(aws secretsmanager get-secret-value \
+      --secret-id devops-project/db-credentials \
+      --query 'SecretString' \
+      --output text | jq -r '.username') \
+    --from-literal=password=$(aws secretsmanager get-secret-value \
+      --secret-id devops-project/db-credentials \
+      --query 'SecretString' \
+      --output text | jq -r '.password') \
+    --dry-run=client -o yaml | kubectl apply -f -
+  echo "    Namespace and secrets ready in $(format_time $((SECONDS - STEP_START)))"
+
+  echo "==> [5/7] Applying Addons"
   STEP_START=$SECONDS
   cd $INFRA_DIR/addons && terraform apply -auto-approve
   echo "    Addons done in $(format_time $((SECONDS - STEP_START)))"
 
-  echo "==> [5/6] Applying Kubernetes resources"
+  echo "==> [6/7] Applying Kubernetes resources"
   STEP_START=$SECONDS
   kubectl apply -f $K8S_DIR
   echo "    Kubernetes resources done in $(format_time $((SECONDS - STEP_START)))"
 
   # ... existing steps ...
 
-  echo "==> [5/6] Applying Data Plane"
+  echo "==> [7/7] Applying Data Plane"
   STEP_START=$SECONDS
   cd $INFRA_DIR/data-plane && terraform init && terraform apply -auto-approve
   echo "    Data plane done in $(format_time $((SECONDS - STEP_START)))"
