@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-cart
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-cart
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-cart
+    spec:
+      containers:
+      - name: cart
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DYNAMODB_TABLE_NAME
+          value: {{ .Values.dynamodb.tableName | quote }}
+        - name: AWS_DEFAULT_REGION
+          value: {{ .Values.dynamodb.region | quote }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}

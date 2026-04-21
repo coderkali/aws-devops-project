@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-checkout
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-checkout
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-checkout
+    spec:
+      containers:
+      - name: checkout
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: 8080
+        env:
+        - name: REDIS_URL
+          value: "redis://{{ .Values.redis.host }}:{{ .Values.redis.port }}"
+        - name: MESSAGING_PROVIDER
+          value: "sqs"
+        - name: MESSAGING_SQS_QUEUE_URL
+          value: {{ .Values.messaging.queueUrl | quote }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}

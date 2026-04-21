@@ -1,0 +1,25 @@
+replicaCount: 1
+
+image:
+  repository: public.ecr.aws/aws-containers/retail-store-sample-catalog
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: false
+
+db:
+  name: catalog
+  port: 3306
+
+resources:
+  requests:
+    cpu: 128m
+    memory: 256Mi
+  limits:
+    cpu: 256m
+    memory: 512Mi

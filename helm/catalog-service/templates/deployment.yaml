@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-catalog
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-catalog
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-catalog
+    spec:
+      containers:
+      - name: catalog
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_HOST
+          value: {{ .Values.db.host | quote }}
+        - name: DB_NAME
+          value: {{ .Values.db.name | quote }}
+        - name: DB_PORT
+          value: {{ .Values.db.port | quote }}
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: password
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}

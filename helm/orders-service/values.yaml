@@ -1,0 +1,28 @@
+replicaCount: 1
+
+image:
+  repository: public.ecr.aws/aws-containers/retail-store-sample-orders
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: false
+
+db:
+  name: orders
+  port: 5432
+
+messaging:
+  queueUrl: ""
+
+resources:
+  requests:
+    cpu: 128m
+    memory: 256Mi
+  limits:
+    cpu: 256m
+    memory: 512Mi

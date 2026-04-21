@@ -1,0 +1,31 @@
+replicaCount: 1
+
+image:
+  repository: public.ecr.aws/aws-containers/retail-store-sample-ui
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: true
+  className: alb
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+
+env:
+  ENDPOINTS_CATALOG: "http://catalog-service:8080"
+  ENDPOINTS_CARTS: "http://cart-service:8080"
+  ENDPOINTS_ORDERS: "http://orders-service:8080"
+  ENDPOINTS_CHECKOUT: "http://checkout-service:8080"
+
+resources:
+  requests:
+    cpu: 128m
+    memory: 256Mi
+  limits:
+    cpu: 256m
+    memory: 512Mi
