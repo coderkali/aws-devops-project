@@ -14,7 +14,6 @@ ingress:
 
 dynamodb:
   tableName: devops-carts
-  region: us-east-1
 
 resources:
   requests:

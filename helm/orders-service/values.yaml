@@ -13,8 +13,7 @@ ingress:
   enabled: false
 
 db:
-  name: orders
-  port: 5432
+  host: ""
 
 messaging:
   queueUrl: ""

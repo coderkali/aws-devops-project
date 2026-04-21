@@ -21,10 +21,12 @@ spec:
         - containerPort: 8080
         env:
         - name: REDIS_URL
-          value: "redis://{{ .Values.redis.host }}:{{ .Values.redis.port }}"
-        - name: MESSAGING_PROVIDER
+          value: "redis://{{ .Values.redis.host }}:6379"
+        - name: SPRING_PROFILES_ACTIVE
           value: "sqs"
-        - name: MESSAGING_SQS_QUEUE_URL
+        - name: MESSAGING_SQS_REGION
+          value: "us-east-1"
+        - name: MESSAGING_SQS_QUEUEURL
           value: {{ .Values.messaging.queueUrl | quote }}
         resources:
           {{- toYaml .Values.resources | nindent 10 }}

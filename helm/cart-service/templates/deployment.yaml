@@ -20,9 +20,11 @@ spec:
         ports:
         - containerPort: 8080
         env:
-        - name: DYNAMODB_TABLE_NAME
+        - name: SPRING_PROFILES_ACTIVE
+          value: "dynamodb"
+        - name: CARTS_DYNAMODB_TABLENAME
           value: {{ .Values.dynamodb.tableName | quote }}
-        - name: AWS_DEFAULT_REGION
-          value: {{ .Values.dynamodb.region | quote }}
+        - name: CARTS_DYNAMODB_CREATETABLE
+          value: "false"
         resources:
           {{- toYaml .Values.resources | nindent 10 }}

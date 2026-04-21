@@ -20,9 +20,15 @@ spec:
         ports:
         - containerPort: 8080
         env:
-        {{- range $key, $value := .Values.env }}
-        - name: {{ $key }}
-          value: {{ $value | quote }}
-        {{- end }}
+        - name: JAVA_OPTS
+          value: "-XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/urandom"
+        - name: ENDPOINTS_CATALOG
+          value: "http://catalog"
+        - name: ENDPOINTS_CARTS
+          value: "http://carts"
+        - name: ENDPOINTS_ORDERS
+          value: "http://orders"
+        - name: ENDPOINTS_CHECKOUT
+          value: "http://checkout"
         resources:
           {{- toYaml .Values.resources | nindent 10 }}

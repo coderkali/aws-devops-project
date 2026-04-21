@@ -13,8 +13,7 @@ ingress:
   enabled: false
 
 db:
-  name: catalog
-  port: 3306
+  host: ""
 
 resources:
   requests:
