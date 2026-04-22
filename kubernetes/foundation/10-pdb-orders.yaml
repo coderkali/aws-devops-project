@@ -1,0 +1,11 @@
+# Phase 7: PodDisruptionBudget for Orders
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: orders-pdb
+  namespace: retail-store
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: orders
