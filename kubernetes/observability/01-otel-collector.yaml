@@ -1,0 +1,64 @@
+# Phase 8: OpenTelemetry Collector Configuration
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel-collector
+  namespace: opentelemetry
+spec:
+  mode: daemonset
+  image: otel/opentelemetry-collector-k8s:0.88.0
+  config:
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+      prometheus:
+        config:
+          scrape_configs:
+          - job_name: kubernetes-pods
+            kubernetes_sd_configs:
+            - role: pod
+            relabel_configs:
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+              action: keep
+              regex: "true"
+
+    processors:
+      batch:
+        send_batch_size: 100
+        timeout: 5s
+      memory_limiter:
+        check_interval: 1s
+        limit_mib: 512
+
+    exporters:
+      awsxray:
+        region: us-east-1
+      awscloudwatch:
+        region: us-east-1
+        log_group_name: /aws/opentelemetry/collector
+      prometheus:
+        endpoint: 0.0.0.0:8888
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [awsxray]
+        metrics:
+          receivers: [otlp, prometheus]
+          processors: [memory_limiter, batch]
+          exporters: [awscloudwatch, prometheus]
+        logs:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [awscloudwatch]
+
+  serviceAccount: otel-collector
+  env:
+  - name: AWS_REGION
+    value: us-east-1
