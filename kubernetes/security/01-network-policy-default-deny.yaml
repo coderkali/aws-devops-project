@@ -1,0 +1,12 @@
+# Phase 11: Network Policy - Default Deny All Ingress
+# Security best practice: Deny all traffic by default, allow only what's needed
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: retail-store
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
