@@ -1,0 +1,185 @@
+# Phase 11: RBAC - Least Privilege Access Control
+# Each service account gets only the permissions it needs
+
+---
+# Catalog Service - Read-only access to ConfigMaps
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: catalog-sa
+  namespace: retail-store
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: catalog-role
+  namespace: retail-store
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get"]
+  resourceNames: ["db-credentials"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: catalog-rolebinding
+  namespace: retail-store
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: catalog-role
+subjects:
+- kind: ServiceAccount
+  name: catalog-sa
+  namespace: retail-store
+
+---
+# Orders Service - Read Secrets
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: orders-sa
+  namespace: retail-store
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: orders-role
+  namespace: retail-store
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get"]
+  resourceNames: ["db-credentials"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: orders-rolebinding
+  namespace: retail-store
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: orders-role
+subjects:
+- kind: ServiceAccount
+  name: orders-sa
+  namespace: retail-store
+
+---
+# Checkout Service - Read Secrets and ConfigMaps
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: checkout-sa
+  namespace: retail-store
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: checkout-role
+  namespace: retail-store
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get"]
+  resourceNames: ["db-credentials"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: checkout-rolebinding
+  namespace: retail-store
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: checkout-role
+subjects:
+- kind: ServiceAccount
+  name: checkout-sa
+  namespace: retail-store
+
+---
+# Cart Service - Read Secrets
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cart-sa
+  namespace: retail-store
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cart-role
+  namespace: retail-store
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get"]
+  resourceNames: ["db-credentials"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cart-rolebinding
+  namespace: retail-store
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cart-role
+subjects:
+- kind: ServiceAccount
+  name: cart-sa
+  namespace: retail-store
+
+---
+# UI Service - Read ConfigMaps only
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ui-sa
+  namespace: retail-store
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ui-role
+  namespace: retail-store
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ui-rolebinding
+  namespace: retail-store
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ui-role
+subjects:
+- kind: ServiceAccount
+  name: ui-sa
+  namespace: retail-store
